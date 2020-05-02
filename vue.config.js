@@ -1,6 +1,6 @@
 const webpack = require('webpack')
 module.exports = {
-    publicPath: process.env.NODE_ENV === 'production'
-      ? '/FLClient/'
-      : '/'
+    chainWebpack: (config) => {
+        config.resolve.symlinks(false)
+      }
   }
