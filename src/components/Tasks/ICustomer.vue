@@ -144,7 +144,7 @@
 import { get, post } from "./../../Ajax/Http";
 
 export default {
-  created() {},
+  name: "ICustomer",
   data() {
     return {
       tasks: [],

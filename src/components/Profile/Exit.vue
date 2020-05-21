@@ -14,6 +14,7 @@
 
 <script>
 export default {
+  name: "Exit",
   methods: {
     goPage(item) {
       this.$router.push({ name: item });

@@ -45,7 +45,7 @@
 import { post } from "./../../Ajax/Http";
 
 export default {
-  name: "arbitration",
+  name: "Arbitration",
   props: {
     id: "",
     message: ""

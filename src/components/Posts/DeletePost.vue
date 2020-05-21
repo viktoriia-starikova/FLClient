@@ -67,7 +67,7 @@
 import { get, post, del } from "./../../Ajax/Http";
 
 export default {
-  name: "PostDetail",
+  name: "DeletePost",
   data() {
     return {
       postid: ""

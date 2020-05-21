@@ -173,6 +173,7 @@
 import { get, post } from "./../../Ajax/Http";
 
 export default {
+  name: "AddPost",
   data() {
     return {
       title: "",

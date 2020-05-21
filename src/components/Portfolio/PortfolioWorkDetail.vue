@@ -63,7 +63,7 @@ import { get } from "./../../Ajax/Http";
 import Files from "../Files";
 
 export default {
-  name: "PostDetail",
+  name: "PortfolioWorkDetail",
   components: {
     Files
   },

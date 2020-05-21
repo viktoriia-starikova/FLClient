@@ -9,7 +9,7 @@ import Posts from "@/components/Posts/Posts.vue";
 import { get } from "./../Ajax/Http";
 
 export default {
-  name: "home",
+  name: "My_posts",
   props: {
     mess: ""
   },

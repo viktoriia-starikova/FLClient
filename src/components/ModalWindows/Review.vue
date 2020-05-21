@@ -55,7 +55,7 @@
 import { post } from "./../../Ajax/Http";
 
 export default {
-  name: "modal",
+  name: "Review",
   props: {
     id: "",
     message: "",

@@ -295,6 +295,7 @@
 import { get, put, post, postFiles, del } from "./../Ajax/Http";
 
 export default {
+  name: "Profile",
   data() {
     return {
       username: "",

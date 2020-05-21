@@ -22,6 +22,7 @@
 
 <script>
 export default {
+  name: "About",
   methods: {
       goPage(item) {
           this.$router.push({name: item})

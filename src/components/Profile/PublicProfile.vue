@@ -174,6 +174,7 @@
 import { get, post, put } from "./../../Ajax/Http";
 
 export default {
+  name: "PublicProfile",
   data() {
     return {
       username: "",

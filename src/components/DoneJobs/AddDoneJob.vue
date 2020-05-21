@@ -196,6 +196,7 @@
 import { get, post } from "./../../Ajax/Http";
 
 export default {
+  name: "AddDoneJob",
   data() {
     return {
       file: "",

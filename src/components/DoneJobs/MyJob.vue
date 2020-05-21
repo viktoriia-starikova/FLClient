@@ -92,7 +92,7 @@ import Fuse from "fuse.js";
 import { get, post } from "./../../Ajax/Http";
 
 export default {
-  name: "myJob",
+  name: "MyJob",
   props: {
     jobs: "",
     mess: ""

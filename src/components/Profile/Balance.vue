@@ -117,6 +117,7 @@
 import { get } from "../../Ajax/Http";
 
 export default {
+  name: "Balance",
   data() {
     return {
       paymentHistory: [],

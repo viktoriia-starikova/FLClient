@@ -9,7 +9,7 @@ import Tasks from "@/components/Tasks/Tasks.vue";
 import { get } from "./../Ajax/Http";
 
 export default {
-  name: "my_tasks",
+  name: "My_tasks",
   props: {
     mess: ""
   },

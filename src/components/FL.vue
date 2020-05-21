@@ -179,6 +179,7 @@
 </template>
 <script>
 export default {
+  name: "FL",
   data() {
     return {
       message: ""

@@ -81,7 +81,7 @@
 import { get, post } from "./../../Ajax/Http";
 
 export default {
-       name:"Tasks",
+       name:"MyTask",
        props: {
          mess:'',
        },

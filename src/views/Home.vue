@@ -7,7 +7,7 @@
 <script>
 import Posts from "@/components/Posts/Posts.vue";
 export default {
-  name: "home",
+  name: "Home",
   components: {
     Posts
   },

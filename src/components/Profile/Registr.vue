@@ -128,6 +128,7 @@
 import { post } from "./../../Ajax/Http";
 
 export default {
+  name: "Registr",
   data() {
     return {
       username: "",

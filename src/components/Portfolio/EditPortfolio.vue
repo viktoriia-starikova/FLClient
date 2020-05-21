@@ -195,6 +195,7 @@
 import { get, postFiles, post } from "./../../Ajax/Http";
 
 export default {
+  name: "EditPortfolio",
   data() {
     return {
       file: "",

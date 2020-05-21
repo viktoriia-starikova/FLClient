@@ -35,7 +35,7 @@
 import { post } from "./../../Ajax/Http";
 
 export default {
-  name: "arbitration",
+  name: "DeleteTask",
   methods: {
     close() {
       this.$emit("close");

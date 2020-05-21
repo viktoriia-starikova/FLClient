@@ -80,7 +80,7 @@ import Datepicker from "vuejs-datetimepicker";
 import { get, post } from "./../../Ajax/Http";
 
 export default {
-  name: "modal",
+  name: "Dialog",
   props: {
     userId: ""
   },

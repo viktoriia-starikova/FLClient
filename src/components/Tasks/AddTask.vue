@@ -233,6 +233,7 @@ import Datepicker from "vuejs-datetimepicker";
 import { post, get, postFiles } from "./../../Ajax/Http";
 
 export default {
+  name: "AddTask",
   data() {
     return {
       file: "",

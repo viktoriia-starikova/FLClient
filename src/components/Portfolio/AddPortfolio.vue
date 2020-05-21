@@ -192,6 +192,7 @@
 import { get, postFiles } from "./../../Ajax/Http";
 
 export default {
+  name: "AddPortfolio",
   data() {
     return {
       file: "",
