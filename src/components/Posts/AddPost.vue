@@ -96,7 +96,6 @@
                     class="btnOtst btn btn-sm btn-secondary"
                   >
                     <b>Im</b>
-                    <!-- <i class="ic material-icons">insert_photo</i> -->
                   </button>
                 </ul>
 
@@ -171,6 +170,8 @@
 
 
 <script>
+import { get, post } from "./../../Ajax/Http";
+
 export default {
   data() {
     return {
@@ -184,22 +185,22 @@ export default {
       this.$router.push({ name: item });
     },
     addPost() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/my/",
-        type: "POST",
-        data: {
+      const url = this.$store.getters.get_url_server + "api/v1/my/";
+      post(
+        url,
+        response => {
+          this.$router.push({ name: "my_posts" });
+        },
+        {
           title: this.title,
           text: this.text
         },
-        success: response => {
-          this.$router.push({ name: "my_posts" });
-        },
-        error: response => {
+        response => {
           if (response.status === 400) {
             this.mess = "Пожалуйста, заполните все поля!";
           }
         }
-      });
+      );
     },
     addTagB() {
       this.text += "<b> </b>";

@@ -19,6 +19,7 @@ import Tasks from './components/Tasks/Tasks.vue'
 import AddTask from './components/Tasks/AddTask.vue'
 import Dialog from './components/Chat/Dialog.vue'
 import TaskDetail from './components/Tasks/TaskDetail.vue'
+import EditTask from './components/Tasks/EditTask.vue'
 import MyActiveTasks from './components/Tasks/MyActiveTasks.vue'
 import AddDoneJob from './components/DoneJobs/AddDoneJob.vue'
 import AddPortfolio from './components/Portfolio/AddPortfolio.vue'
@@ -27,6 +28,7 @@ import Arbitration from './components/Arbitration/Arbitration.vue'
 import Review from './components/ModalWindows/Review.vue'
 import PortfolioWorkDetail from './components/Portfolio/PortfolioWorkDetail.vue'
 import PayPal from './components/PayPal/PayPal.vue'
+import Withdrawal from './components/PayPal/Withdrawal.vue'
 import ICustomer from './components/Tasks/ICustomer.vue'
 import FL from './components/FL.vue'
 import store from './store'
@@ -91,6 +93,11 @@ export default new Router({
       path: '/payPal',
       name: 'payPal',
       component: PayPal
+    },
+    {
+      path: '/withdrawal',
+      name: 'withdrawal',
+      component: Withdrawal
     },
     {
       path: '/publicProfile/:Id/',
@@ -199,6 +206,11 @@ export default new Router({
       path: '/editPortfolio/:Id/',
       name: 'editPortfolio',
       component: EditPortfolio,
+    },
+    {
+      path: '/editTask/:Id/',
+      name: 'editTask',
+      component: EditTask,
     },
     {
       path: '/delete/:Id/',

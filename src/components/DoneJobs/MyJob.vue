@@ -61,7 +61,7 @@
                 <b>{{post.title}}</b>
               </h3>
               <p>{{post.text| truncate(300, '...')}}</p>
-              <div class="col-12 mb-3">
+              <div class="col-12 mb-3" style="padding-left: 0px;">
                 <b>{{ post.like }}</b>
                 <i id="loginModal" class="material-icons">thumb_up</i>
               </div>
@@ -119,16 +119,6 @@ export default {
     displayedJobs(rez) {
       return this.paginate(rez);
     },
-    loadPosts() {
-      const url =
-        this.$store.getters.get_url_server +
-        "api/v1/intrestingPosts/" +
-        this.$store.getters.get_user_info.user.id +
-        "/";
-        get(url, response => {
-          this.posts = response;
-        });
-    },
     filteredList() {
       var search = this.search;
       if (search.length < 1) return this.paginate(this.jobs);
@@ -153,6 +143,16 @@ export default {
     },
     loadJob(id) {
       this.$router.push({ name: "task_detail", params: { taskId: id } });
+    },
+    loadPosts() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/intrestingPosts/" +
+        this.$store.getters.get_user_info.user.id +
+        "/";
+        get(url, response => {
+          this.posts = response;
+        });
     },
     loadProf(id) {
       if (this.$store.getters.get_user_info.user.id == id) {

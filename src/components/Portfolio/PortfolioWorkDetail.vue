@@ -10,7 +10,7 @@
               </h3>
               <span>
                 <a @click="goPage('fl')" href="#">Биржа фриланса</a>
-                <a @click="loadProf(work.avtor.id)" href="#">/ {{work.avtor.username}}</a>
+                <a @click="loadProf(work.author.id)" href="#">/ {{work.author.username}}</a>
                 <span class="text-muted">/ Работа из портфолио</span>
               </span>
             </div>
@@ -32,21 +32,20 @@
                 </span>
                 <p>
                   <b class="user_image">Автор:</b>
-                  <a @click="loadProf(work.avtor.id)" href>{{work.avtor.username}}</a>
+                  <a @click="loadProf(work.author.id)" href>{{work.author.username}}</a>
                 </p>
               </div>
             </div>
           </div>
         </div>
         <aside v-if="posts.length" class="col-md-4">
-          <div class="p-3 rounded nb-3">
-            <h2 style="color: #b38a22;">Популярные посты</h2>
+          <div class="rounded nb-3">
             <div v-for="post in posts" class="alert alert-light">
               <h3>
                 <b>{{post.title}}</b>
               </h3>
               <p>{{post.text| truncate(300, '...')}}</p>
-              <div class="col-12 mb-3">
+              <div class="col-12 mb-3" style="padding-left: 0px;">
                 <b>{{ post.like }}</b>
                 <i id="loginModal" class="material-icons">thumb_up</i>
               </div>
@@ -60,7 +59,7 @@
 </template>
 
 <script>
-import { get, post } from "./../../Ajax/Http";
+import { get } from "./../../Ajax/Http";
 import Files from "../Files";
 
 export default {
@@ -89,16 +88,13 @@ export default {
       this.$router.push({ name: "post_detail", params: { postId: id } });
     },
     loadPosts() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/intrestingPosts/" +
-          this.work.avtor.id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.posts = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/intrestingPosts/" +
+        this.work.author.id +
+        "/";
+      get(url, response => {
+        this.posts = response;
       });
     },
     goPage(item) {
@@ -112,18 +108,14 @@ export default {
       }
     },
     loadPortfolioWork() {
-      $.ajax({
-        async: false,
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/portfolioDetail/" +
-          this.$route.params.id,
-        type: "GET",
-        success: response => {
-          this.work = response.portfolio;
-          this.files = response.files;
-          this.loadPosts();
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/portfolioDetail/" +
+        this.$route.params.id;
+      get(url, response => {
+        this.work = response.portfolio;
+        this.files = response.files;
+        this.loadPosts();
       });
     }
   },

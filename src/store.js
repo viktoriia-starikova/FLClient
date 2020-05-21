@@ -24,7 +24,7 @@ export default new Vuex.Store({
       get_url_media(state) {
           return state.url_media
       },
-      get_user_avtoriz(state) {
+      get_user_authoriz(state) {
           return state.auth_user
       },
     },

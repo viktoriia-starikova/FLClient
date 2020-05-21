@@ -23,11 +23,11 @@ export function post(url, callback = null, data = null, errorCallback = null) {
         type: "POST",
         success: response => {
             NProgress.done();
-            callback(response);
+            if (callback) callback(response);
         },
         error: response => {
             NProgress.done();
-            errorCallback(response);
+            if(errorCallback) errorCallback(response);
         }
     });
 };
@@ -42,16 +42,16 @@ export function postFiles(url, callback = null, data = null, errorCallback = nul
         type: "POST",
         success: response => {
             NProgress.done();
-            callback(response);
+            if (callback) callback(response);
         },
         error: response => {
             NProgress.done();
-            errorCallback(response);
+            if(errorCallback) errorCallback(response);
         }
     });
 };
 
-export function put(url, callback, data = null) {
+export function put(url, callback, data = null,  errorCallback = null) {
     NProgress.start();
     $.ajax({
         url: url,
@@ -62,7 +62,24 @@ export function put(url, callback, data = null) {
             callback(response);
         },
         error: response => {
+            if(errorCallback) errorCallback(response);
             NProgress.done();
         }
     });
 };
+
+export function del(url, callback, data) {
+    NProgress.start();
+    $.ajax({
+        url: url,
+        type: "DELETE",
+        data: data,
+        success: response => {
+            callback(response)
+            NProgress.done();
+        },
+        error: response => {
+            NProgress.done();
+        }
+    });
+}

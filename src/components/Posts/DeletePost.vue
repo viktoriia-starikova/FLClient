@@ -64,12 +64,10 @@
 </template>
 
 <script>
+import { get, post, del } from "./../../Ajax/Http";
+
 export default {
   name: "PostDetail",
-
-  // props: {
-  //   post: ""
-  // },
   data() {
     return {
       postid: ""
@@ -79,20 +77,20 @@ export default {
     this.loadPost();
   },
   beforeCreate() {
-    $.ajax({
-      url:
-        this.$store.getters.get_url_server +
-        "api/v1/posts/" +
-        this.$route.params.Id +
-        "/",
-      data: {
-        pk: this.$route.params.Id
-      },
-      type: "GET",
-      success: response => {
+    const url =
+      this.$store.getters.get_url_server +
+      "api/v1/posts/" +
+      this.$route.params.Id +
+      "/";
+    get(
+      url,
+      response => {
         this.postid = response;
+      },
+      {
+        pk: this.$route.params.Id
       }
-    });
+    );
   },
   computed: {
     auth() {
@@ -106,58 +104,50 @@ export default {
     },
 
     like(id) {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/like/",
-        type: "POST",
-        data: {
-          pk: id
-        },
-        success: response => {
+      const url = this.$store.getters.get_url_server + "api/v1/like/";
+      post(
+        url,
+        response => {
           this.loadPost();
         },
-        error: response => {
-          console.log("False");
+        {
+          pk: id
         }
-      });
+      );
     },
     loadPost() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/posts/" +
-          this.$route.params.Id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.postid = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/posts/" +
+        this.$route.params.Id +
+        "/";
+      get(url, response => {
+        this.postid = response;
       });
     },
     deletePost(id) {
-      // if (this.$store.getters.get_user_info.user.username == this.postid.avtor.username || this.$store.getters.get_user_info.user.username == ""){
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/posts/" +
-          this.$route.params.Id +
-          "/",
-        type: "DELETE",
-        data: {
-          pk: id
-        },
-        success: response => {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/posts/" +
+        this.$route.params.Id +
+        "/";
+      del(
+        url,
+        response => {
           window.location = "/my";
+        },
+        {
+          pk: id
         }
-      });
-      // }
+      );
     }
   },
   filters: {
     // Фильтр полной даты числами
     filterDateTime(item) {
       let old_date = new Date(item);
-      return `
-                 ${old_date.getDate()}.${old_date.getMonth()+1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
+      return `${old_date.getDate()}.${old_date.getMonth() +
+        1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
     }
   }
 };

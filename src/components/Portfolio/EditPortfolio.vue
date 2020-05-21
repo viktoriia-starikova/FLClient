@@ -119,7 +119,7 @@
                   </label>
                 </div>
                 <b>Вы выбрали:</b>
-                <a :href="$store.getters.get_url_media + img">{{img}}</a>
+                <a :href="$store.getters.get_url_media + img">{{img || img.name}}</a>
               </div>
 
               <div v-if="!img" class="not-selected-input">
@@ -171,7 +171,7 @@
                 <a
                   v-for="file in files"
                   :href="$store.getters.get_url_media + file.file"
-                >{{file.file}}</a>
+                >{{file.file || file.name}} </a>
               </div>
               <div>
                 <p class="b">{{mess}}</p>

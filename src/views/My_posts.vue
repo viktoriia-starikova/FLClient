@@ -6,6 +6,8 @@
 
 <script>
 import Posts from "@/components/Posts/Posts.vue";
+import { get } from "./../Ajax/Http";
+
 export default {
   name: "home",
   props: {
@@ -24,13 +26,10 @@ export default {
   },
   methods: {
     loadPosts() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/my",
-        type: "GET",
-        success: response => {
-          this.posts = response;
-          console.log("Все посты успешно загружены");
-        }
+      const url = this.$store.getters.get_url_server + "api/v1/my";
+      get(url, response => {
+        this.posts = response;
+        console.log("Все посты успешно загружены");
       });
     }
   }

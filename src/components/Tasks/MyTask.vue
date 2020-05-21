@@ -114,40 +114,26 @@ export default {
              this.$router.push({name: item})
          },
          loadTasks() {
-             
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/my/tasks/',
-             type:"GET",
-             success: (response) => {
-               this.tasks=response
-                
-               this.checkedCategory = ""
-             }
-           })
+           const url = this.$store.getters.get_url_server + 'api/v1/my/tasks/';
+           get(url, response => {
+               this.tasks=response;
+               this.checkedCategory = "";
+             })
          },
          loadTasksByCategory(category) {
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/myTasksByCategory/' + category.id +'/',
-             type:"GET",
-             success: (response) => {
+           const url = this.$store.getters.get_url_server + 'api/v1/myTasksByCategory/' + category.id +'/';
+           get(url, response => {
                if(response){
-                  this.tasks=response
-                   
-                  this.checkedCategory = category
+                  this.tasks=response;
+                  this.checkedCategory = category;
                }
-             }
-           })
+             })
          },
          loadCategories() {
-             
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/categories/',
-             type:"GET",
-             success: (response) => {
-                
-               this.categories=response
-             }
-           })
+           const url = this.$store.getters.get_url_server + 'api/v1/categories/';
+           get(url, response => {
+              this.categories=response
+             });
          },
          loadTask(id) {
            this.$router.push({ name: 'task_detail', params: { taskId: id }})
@@ -181,7 +167,6 @@ export default {
          },
        },
        filters: {
-           // Фильтр полной даты числами
            filterDateTime(item) {
                let old_date = new Date(item)
                return `

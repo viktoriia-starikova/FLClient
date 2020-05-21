@@ -32,7 +32,7 @@
                 </span>
                 <p>
                   <b class="user_image">Автор:</b>
-                  <a @click="loadProf(post.avtor.id)" href="#">{{post.avtor.username}}</a>
+                  <a @click="loadProf(post.author.id)" href="#">{{post.author.username}}</a>
                 </p>
               </div>
             </div>
@@ -122,8 +122,9 @@
   </div>
 </template>
 <script>
- 
+import { get, post, put } from "./../../Ajax/Http";
 import Fuse from "fuse.js";
+
 export default {
   name: "Posts",
   props: {
@@ -166,43 +167,24 @@ export default {
       this.$router.push({ name: item });
     },
     like(id) {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/like/",
-        type: "POST",
-        data: {
-          pk: id
-        },
-        success: response => {
-          this.$emit("reload");
-          // this.loadPosts()
-          // this.paginate(this.posts)
-          console.log("Лайк " + id + " посту");
-        },
-        error: response => {
-          console.log("Лайк не может быть поставлен " + id + " посту");
-        }
+      const url = this.$store.getters.get_url_server + "api/v1/like/";
+      post(url, response =>{ this.$emit("reload")}, {
+        pk: id
       });
     },
     loadPosts() {
-       
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/",
-
-        type: "GET",
-        success: response => {
-          this.posts = response;
-           
-        }
+      const url = this.$store.getters.get_url_server + "api/v1/";
+      get(url, response => {
+        this.posts = response;
       });
     },
     loadPost(id) {
       this.$router.push({ name: "post_detail", params: { postId: id } });
     },
     loadProf(id) {
-      if(this.$store.getters.get_user_info.user.id == id){
+      if (this.$store.getters.get_user_info.user.id == id) {
         this.$router.push({ name: "profile", params: { Id: id } });
-      }
-      else{
+      } else {
         this.$router.push({ name: "publicProfile", params: { Id: id } });
       }
     },
@@ -236,12 +218,11 @@ export default {
       this.setPages2(this.filteredList());
     }
   },
-
   filters: {
-    // Фильтр полной даты числами
     filterDateTime(item) {
       let old_date = new Date(item);
-      return `${old_date.getDate()}.${old_date.getMonth()+1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
+      return `${old_date.getDate()}.${old_date.getMonth() +
+        1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
     }
   }
 };

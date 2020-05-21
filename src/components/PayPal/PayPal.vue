@@ -7,29 +7,27 @@
           <div>
             <h1>Пополнить баланс</h1>
             <p class="mt-2"><b>Сумма пополнения, $</b></p>
-            <input class="form-control mb-4" type="number" value="100" id="example-number-input">
+            <input v-model="cost" class="form-control mb-4" type="number" id="example-number-input">
           </div>
           <hr>
           <div ref="paypal"></div>
         </div>
       </div>
     </div>
+    <FlashMessage></FlashMessage>
   </main>
 </template>
 
 <script>
+import { post } from "./../../Ajax/Http";
+
 export default {
   name: "PayPal",
 
   data: function() {
     return {
       loaded: false,
-      paidFor: false,
-      product: {
-        price: 0.1,
-        description: "leg lamp from that one movie",
-        img: "./assets/lamp.jpg"
-      }
+      cost: 100
     };
   },
   mounted: function() {
@@ -39,6 +37,9 @@ export default {
     document.body.appendChild(script);
   },
   methods: {
+    goPage(item) {
+      this.$router.push({ name: item });
+    },
     setLoaded: function() {
       this.loaded = true;
       window.paypal
@@ -47,21 +48,31 @@ export default {
             return actions.order.create({
               purchase_units: [
                 {
-                  description: this.product.description,
+                  description: "Пополнение счета FL",
                   amount: {
                     currency_code: "USD",
-                    value: this.product.price
+                    value: this.cost
                   }
                 }
               ]
             });
           },
           onApprove: async (data, actions) => {
-            const order = await actions.order.capture();
-            this.paidFor = true;
-            console.log(order);
+            const url = this.$store.getters.get_url_server + "api/v1/up-balance/";
+            post(url, response => {
+            this.flashMessage.warning({
+              title: "Информация",
+              message: "Ваш счет успешно пополнен!"
+            });
+              this.goPage('balance');
+            }, {"payer_id": data.payerID, "order_id": data.orderID});
+            console.log(data);
           },
           onError: err => {
+            this.flashMessage.error({
+              title: "Ошибка",
+              message: "Не удалось пополнить счет!"
+            });
             console.log(err);
           }
         })

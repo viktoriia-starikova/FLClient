@@ -96,7 +96,6 @@
                     class="btnOtst btn btn-sm btn-secondary"
                   >
                     <b>Im</b>
-                    <!-- <i class="ic material-icons">insert_photo</i> -->
                   </button>
                 </ul>
                 <div class>
@@ -169,6 +168,8 @@
 
 
 <script>
+import { get, post, put } from "./../../Ajax/Http";
+
 export default {
   name: "EditPost",
   created() {
@@ -186,42 +187,38 @@ export default {
       this.$router.push({ name: item });
     },
     loadPost() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/posts/" +
-          this.$route.params.Id +
-          "/",
-        type: "GET",
-        success: response => {
-          (this.title = response.title), (this.text = response.text);
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/posts/" +
+        this.$route.params.Id +
+        "/";
+      get(url, response => {
+        (this.title = response.title), (this.text = response.text);
       });
     },
     updatePost() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/posts/" +
-          this.$route.params.Id +
-          "/",
-        type: "PUT",
-        data: {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/posts/" +
+        this.$route.params.Id +
+        "/";
+      put(
+        url,
+        response => {
+          this.$router.push({ name: "my_posts" });
+        },
+        {
           pk: this.$route.params.Id,
           title: this.title,
           text: this.text,
-          avtor: this.$store.getters.get_user_info.user
+          author: this.$store.getters.get_user_info.user
         },
-        success: response => {
-          this.$router.push({ name: "my_posts" });
-        },
-        error: response => {
-          console.log("False");
+        response => {
           if (response.status === 400) {
             this.mess = "Пожалуйста, заполните все поля!";
           }
         }
-      });
+      );
     },
     addTagB() {
       this.text += "<b> </b>";

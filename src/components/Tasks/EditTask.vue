@@ -5,7 +5,7 @@
       <div class="row">
         <div class="col-md-8">
           <div class="shadow form-section">
-            <h2>Добавить задание</h2>
+            <h2>Редактировать задание</h2>
             <form method="post">
               <div id="div_id_title" class="form-group">
                 <label for="id_title" class="col-form-label requiredField">
@@ -107,11 +107,11 @@
                     name="text"
                     cols="40"
                     rows="10"
-                    required="required"
                     class="textarea form-control"
+                    required="required"
                   ></textarea>
-                  <p id="p">{{mess2}}</p>
                 </div>
+                <p id="p">{{mess2}}</p>
               </div>
               <p>
                 <b>Бюджет</b>
@@ -168,11 +168,11 @@
                     <span class="js-fileName">Загрузить файл</span>
                   </label>
                 </div>
-                <b v-show="files.length">Вы выбрали:</b>
-                <span v-for="file in files">{{file.name }}</span>
+                <b v-show="files.length">На данный момент:</b>
+                <span v-for="file in files">{{file.name || file.file}}</span>
               </div>
               <button
-                @click="addPost"
+                @click="updateTask"
                 type="button"
                 class="button btn btn-outline-warning btn-block btn-dark"
               >Сохранить</button>
@@ -230,7 +230,7 @@
 
 <script>
 import Datepicker from "vuejs-datetimepicker";
-import { post, get, postFiles } from "./../../Ajax/Http";
+import { get, postFiles, post, del, put } from "./../../Ajax/Http";
 
 export default {
   data() {
@@ -241,37 +241,116 @@ export default {
       description: "",
       deadline: "2020-01-16 00:54:00",
       price: 5,
-      mess1: "",
-      mess2: "",
       selectedCategory: "",
       selectedCategoryObject: "",
-      files: []
+      files: [],
+      mess1: "",
+      mess2: ""
     };
   },
   created() {
     this.loadCategories();
-    this.deadline = new Date();
   },
   components: { Datepicker },
   methods: {
     goPage(item) {
       this.$router.push({ name: item });
     },
+    goTaskDetail() {
+      this.$router.push({
+        name: "task_detail",
+        params: { taskId: this.$route.params.Id }
+      });
+    },
     loadCategories() {
       const url = this.$store.getters.get_url_server + "api/v1/categories/";
       get(url, response => {
         this.categories = response;
-        this.selectedCategory = this.categories[0].name;
+        this.loadTask();
       });
     },
-    addPost() {
-      sessionStorage.removeItem("title");
-      const url = this.$store.getters.get_url_server + "api/v1/my/tasks/";
-      post(
+    loadTask() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/task/" +
+        this.$route.params.Id +
+        "/";
+      get(url, response => {
+        this.task = response;
+        this.title = this.task.title;
+        this.description = this.task.description;
+        this.price = this.task.price;
+        this.deadline = this.task.deadline;
+        this.selectedCategory = this.task.category.name;
+        this.selectedCategoryObject = this.categories.find(
+          c => c.name === this.selectedCategory
+        ).id;
+        this.loadFiles();
+      });
+    },
+    loadFiles() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/allFilesByTask/" +
+        this.$route.params.Id +
+        "/";
+      get(url, response => {
+        this.files = response;
+      });
+    },
+    updateFiles() {
+      var files = $("#file");
+      const url = this.$store.getters.get_url_server + "api/v1/file/";
+      var filesList = files.prop("files");
+      if (filesList.length < 1) {
+        this.goTaskDetail();
+      }
+      for (let file of filesList) {
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("task", this.$route.params.Id);
+        postFiles(
+          url,
+          response => {
+            this.goTaskDetail();
+          },
+          formData,
+          response => {
+            this.flashMessage.error({
+              title: "Ошибка",
+              message: "Пожалуйста, попробуйте в другой раз!"
+            });
+          }
+        );
+      }
+    },
+    DeleteFiles() {
+      const files = $("#file");
+      // если файл выбран, то
+      const filesList = files.prop("files");
+      if (filesList.length < 1) {
+        this.goTaskDetail();
+      } else {
+        const url =
+          this.$store.getters.get_url_server +
+          "api/v1/files/task/" +
+          this.$route.params.Id +
+          "/";
+        del(url, response => {
+          this.updateFiles();
+        });
+      }
+    },
+    updateTask() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/task/detail/" +
+        this.$route.params.Id +
+        "/";
+      put(
         url,
         response => {
-          this.addFiles(response);
-          this.$router.push({ name: "my_tasks" });
+          this.DeleteFiles();
         },
         {
           title: this.title,
@@ -289,8 +368,8 @@ export default {
               ? response.responseJSON.description[0]
               : "";
             this.flashMessage.error({
-              title: "Не удается добавить заказ",
-              message: "Пожалуйста, заполните все поля!"
+              title: "Не удается обновить заказ",
+              message: "Пожалуйста, попробуйте в другой раз!"
             });
           }
         }
@@ -326,8 +405,8 @@ export default {
       this.files = filesList;
     },
     addFiles(id) {
-      var files = $("#file");
-      var filesList = files.prop("files");
+      const files = $("#file");
+      const filesList = files.prop("files");
       for (let file of filesList) {
         var formData = new FormData();
         formData.append("file", file);

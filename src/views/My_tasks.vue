@@ -6,6 +6,8 @@
 
 <script>
 import Tasks from "@/components/Tasks/Tasks.vue";
+import { get } from "./../Ajax/Http";
+
 export default {
   name: "my_tasks",
   props: {
@@ -24,13 +26,10 @@ export default {
   },
   methods: {
     loadTasks() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/my/tasks/",
-        type: "GET",
-        success: response => {
-          this.tasks = response;
-          console.log("Все задания успешно загружены");
-        }
+      const url = this.$store.getters.get_url_server + "api/v1/my/tasks/";
+      get(url, response => {
+        this.tasks = response;
+        console.log("Все задания успешно загружены");
       });
     }
   }

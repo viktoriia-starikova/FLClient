@@ -1,6 +1,7 @@
 <template>
   <div>
     <main class="container">
+      <FlashMessage></FlashMessage>
       <div class="row">
         <div class="col-md-8">
           <div class="alert alert-light">
@@ -38,7 +39,19 @@
                 </p>
               </div>
             </div>
-            <hr />
+            <hr v-if="authoriz && task.state == 'posted'" />
+            <a
+              href="#"
+              v-if="authoriz && task.state == 'posted'"
+              @click="goEdit()"
+              class="btn btn-info btn-block"
+            >Редактировать</a>
+            <a
+              href="#"
+              v-if="authoriz && task.state == 'posted'"
+              @click="showDelete = true"
+              class="btn btn-danger btn-block"
+            >Удалить</a>
           </div>
           <div v-if="doneJob" class="alert alert-light">
             <p v-html="doneJob.message"></p>
@@ -122,7 +135,6 @@
                 task.author.id == $store.getters.get_user_info.user.id && 
                 task.contractor.id == request.author.id && 
                 task.state == 'in progress'"
-                
                 style="margin-left: 15px"
                 type="button"
                 class="btn btn-outline-info"
@@ -140,7 +152,7 @@
                 class="btn btn-outline-info approved"
                 @click="showModal = true;"
               >Увеличить сумму и сроки</button>
-              <div v-if="task.state == 'arbitration'">
+              <div v-if="task.state == 'arbitration' && task.contractor.id == request.author.id">
                 <b style="color: #17a2b8;">В арбитраже</b>
               </div>
               <modal
@@ -211,6 +223,7 @@
           </div>
         </aside>
       </div>
+      <DeleteTask v-if="showDelete" @close="showDelete = false" @removeTask="RemoveTask()"></DeleteTask>
     </main>
   </div>
 </template>
@@ -219,9 +232,10 @@
 import modal from "./../modal.vue";
 import Review from "./../ModalWindows/Review.vue";
 import Arbitration from "./../ModalWindows/Arbitration.vue";
+import DeleteTask from "./../ModalWindows/DeleteTask.vue";
 import Files from "../Files";
 import Datepicker from "vuejs-datetimepicker";
-import { get, post } from "./../../Ajax/Http";
+import { get, post, del, put } from "./../../Ajax/Http";
 
 export default {
   name: "TaskDetail",
@@ -230,6 +244,7 @@ export default {
     modal,
     Review,
     Arbitration,
+    DeleteTask,
     Files
   },
   data() {
@@ -248,6 +263,7 @@ export default {
       showReview: false,
       showArbitration: false,
       showDecision: false,
+      showDelete: false,
       decision: ""
     };
   },
@@ -261,7 +277,7 @@ export default {
       if (this.$store.getters.get_auth) return true;
       else return false;
     },
-    avtoriz() {
+    authoriz() {
       if (
         this.$store.getters.get_auth &&
         (this.$store.getters.get_user_info.user.username ==
@@ -328,6 +344,9 @@ export default {
     goPage(item) {
       this.$router.push({ name: item });
     },
+    goEdit() {
+      this.$router.push({ name: "editTask", params: { Id: this.task.id } });
+    },
     loadProf(id) {
       if (this.$store.getters.get_user_info.user.id == id) {
         this.$router.push({ name: "profile", params: { Id: id } });
@@ -335,159 +354,144 @@ export default {
         this.$router.push({ name: "publicProfile", params: { Id: id } });
       }
     },
+    RemoveTask() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/task/" +
+        this.task.id +
+        "/";
+      del(
+        url,
+        response => {
+          this.showDelete = false;
+          this.flashMessage.warning({
+            title: "Информация",
+            message: "Вы успешно удалили заказ!"
+          });
+          this.goPage("my_tasks");
+        },
+        { pk: this.task.id }
+      );
+    },
     loadDoneJob() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/doneJob/" +
-          this.task.id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.doneJob = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/doneJob/" +
+        this.task.id +
+        "/";
+      get(url, response => {
+        this.doneJob = response;
       });
     },
     loadRecommendations() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/recommendations/" +
-          this.task.id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.recommendations = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/recommendations/" +
+        this.task.id +
+        "/";
+      get(url, response => {
+        this.recommendations = response;
       });
     },
     loadProfile() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v2/prof/" +
-          this.task.author.id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.profile = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v2/prof/" +
+        this.task.author.id +
+        "/";
+      get(url, response => {
+        this.profile = response;
       });
     },
     loadRequests() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/requestsForTask/" +
-          this.$route.params.taskId +
-          "/",
-        type: "GET",
-        success: response => {
-          this.requests = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/requestsForTask/" +
+        this.$route.params.taskId +
+        "/";
+      get(url, response => {
+        this.requests = response;
       });
     },
     loadTask() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/task/" +
-          this.$route.params.taskId +
-          "/",
-        type: "GET",
-        success: response => {
-          this.task = response;
-          this.loadProfile();
-          this.loadRecommendations();
-          this.loadDoneJob();
-          if (this.task.state == "resolved") {
-            this.loadDecision();
-          }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/task/" +
+        this.$route.params.taskId +
+        "/";
+      get(url, response => {
+        this.task = response;
+        this.loadProfile();
+        this.loadRecommendations();
+        this.loadDoneJob();
+        if (this.task.state == "resolved") {
+          this.loadDecision();
         }
       });
     },
     loadFiles() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/doneJobFiles/" +
-          this.$route.params.taskId +
-          "/",
-        type: "GET",
-        success: response => {
-          this.jobFiles = response;
-        }
+      const doneJobUrl =
+        this.$store.getters.get_url_server +
+        "api/v1/doneJobFiles/" +
+        this.$route.params.taskId +
+        "/";
+      get(doneJobUrl, response => {
+        this.jobFiles = response;
       });
 
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/allFilesByTask/" +
-          this.$route.params.taskId +
-          "/",
-        type: "GET",
-        success: response => {
-          this.files = response;
-        }
+      const tasksFileUrl =
+        this.$store.getters.get_url_server +
+        "api/v1/allFilesByTask/" +
+        this.$route.params.taskId +
+        "/";
+      get(tasksFileUrl, response => {
+        this.files = response;
       });
     },
-    DeleteTask(id) {
-      // this.$router.push({ name: 'delete_post', params: {Id: id }})
-    },
-    updateTask(id) {
-      // this.$router.push({ name: 'edit_post', params: {Id: id }})
-    },
     sendRequest() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/my/requests/",
-        type: "POST",
-        data: {
-          message: this.message,
-          task: this.task.id
-        },
-        success: response => {
+      const url = this.$store.getters.get_url_server + "api/v1/my/requests/";
+      post(
+        url,
+        response => {
           this.message = "";
           this.loadRequests();
         },
-        error: response => {
-          console.log("False");
+        {
+          message: this.message,
+          task: this.task.id
         }
-      });
+      );
     },
     approvedUser(id) {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/approved/" +
-          this.task.id +
-          "/",
-        type: "PUT",
-        data: {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/approved/" +
+        this.task.id +
+        "/";
+      put(
+        url,
+        response => {
+          this.loadTask();
+        },
+        {
           approved: true,
           contractor: id
         },
-        success: response => {
-          this.loadTask();
-        },
-        error: response => {
-          console.log("False");
+        response => {
+          this.flashMessage.error({
+            title: "Недостаточно средств",
+            message: "Пожалуйста, пополните баланс!"
+          });
+          this.goPage("payPal");
         }
-      });
+      );
     },
     acceptJob() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/acceptJob/" +
-          this.task.id,
-        type: "GET",
-        success: response => {
-          this.loadTask();
-          this.showReview = true;
-        },
-        error: response => {
-          console.log("False");
-        }
+      const url =
+        this.$store.getters.get_url_server + "api/v1/acceptJob/" + this.task.id;
+      get(url, response => {
+        this.loadTask();
+        this.showReview = true;
       });
     },
     getFileName(filename) {
@@ -495,28 +499,6 @@ export default {
       if (fullName.length > 15) return ".." + fullName.substr(9);
       return fullName;
     },
-    anotherFile(filename) {
-      const extencion = this.getExtencion(filename);
-      return (
-        extencion != "rar" &&
-        extencion != "7zip" &&
-        extencion != "png" &&
-        extencion != "jpg" &&
-        extencion != "svg" &&
-        extencion != "gif" &&
-        extencion != "txt" &&
-        extencion != "doc" &&
-        extencion != "docx"
-      );
-    },
-    rarFile(filename) {
-      const extencion = this.getExtencion(filename);
-      return extencion == "rar" || extencion == "7zip";
-    },
-    docFile(filename) {
-      const extencion = this.getExtencion(filename);
-      return extencion == "txt" || extencion == "doc" || extencion == "docx";
-    }
   },
   filters: {
     // Фильтр полной даты числами

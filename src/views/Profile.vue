@@ -5,7 +5,7 @@
         <div class="modal-wrapper">
           <div class="portfolio-modal">
             <div class="modal-body">
-              <slot name="header" >
+              <slot name="header">
                 <button
                   type="button"
                   class="btn-close"
@@ -109,10 +109,10 @@
               @click="checkPortfolio=!checkPortfolio"
               class="row portfolio"
             >
-              <div class="col-11">
+              <div class="col-md-11">
                 <h2>Портфолио</h2>
               </div>
-              <div class="col-1 icon-center">
+              <div class="col-md-1 icon-center">
                 <i v-if="!checkPortfolio" class="fa fa-chevron-right"></i>
                 <i v-if="checkPortfolio" class="fa fa-chevron-down"></i>
               </div>
@@ -146,18 +146,57 @@
                 >Посмотреть</button>
               </div>
             </div>
+            <hr v-if="reviews.length > 0" />
+            <div v-if="reviews.length > 0" @click="showReview=!showReview" class="row portfolio">
+              <div class="col-md-11">
+                <h2>Отзывы</h2>
+              </div>
+              <div class="col-md-1 icon-center">
+                <i v-if="!showReview" class="fa fa-chevron-right"></i>
+                <i v-if="showReview" class="fa fa-chevron-down"></i>
+              </div>
+            </div>
+            <hr v-if="reviews.length > 0" />
+            <div class="scroller50" v-if="showReview">
+              <div v-for="review in reviews" class="mb-3">
+                <div class="row" style="color: #6c757d;">
+                  <div class="col-1"></div>
+                  <div class="col-10">
+                    <div class="row">
+                      <div class="col-12 text-center">
+                        <h5>{{review.message}}</h5>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-1"></div>
+                </div>
+                <div class="row" style="color: #6c757d;">
+                  <div class="col-10">
+                    <div class="row">
+                      <div class="col-12">
+                        <b>@{{review.addresser.username}}</b>
+                        <br />
+                        <b>Дата:</b>
+                        {{review.createdDate | filterDateTime}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+              </div>
+            </div>
             <hr />
             <div @click="checkRedact=!checkRedact" class="row portfolio">
-              <div class="col-11">
+              <div class="col-md-11">
                 <h2>Редактировать данные пользователя</h2>
               </div>
-              <div class="col-1 icon-center">
+              <div class="col-md-1 icon-center">
                 <i v-if="!checkRedact" class="fa fa-chevron-right"></i>
                 <i v-if="checkRedact" class="fa fa-chevron-down"></i>
               </div>
             </div>
             <hr />
-            <form method="POST" v-show="checkRedact">
+            <form v-show="checkRedact">
               <div class="form-group">
                 <label class="col-form-label requiredField">
                   <b>Имя пользователя</b>
@@ -186,7 +225,11 @@
                     type="email"
                     maxlength="254"
                     class="emailinput form-control"
+                    placeholder="Введите email"
                   />
+                  <small
+                    class="form-text text-muted"
+                  >Мы никогда не будем делиться вашей электронной почтой ни с кем другим.</small>
                   <p id="p">{{ mess1 }}</p>
                 </div>
               </div>
@@ -213,12 +256,12 @@
                     </div>
                   </div>На данный момент:
                   <a
-                    :href="$store.getters.get_url_server + $store.getters.get_user_info.img"
+                    :href="$store.getters.get_url_media + $store.getters.get_user_info.img"
                   >{{$store.getters.get_user_info.img}}</a>
                 </div>
               </div>
               <button
-                type="button"
+                type="submit"
                 @click="updateProfile($store.getters.get_user_info.user.id)"
                 class="shadow-lg btn btn-outline-warning btn-block btn-dark"
                 name="button"
@@ -234,7 +277,7 @@
                 <b>{{post.title}}</b>
               </h3>
               <p>{{post.text| truncate(300, '...')}}</p>
-              <div class="col-12 mb-3">
+              <div class="col-12 mb-3" style="padding-left: 0px;">
                 <b>{{ post.like }}</b>
                 <i id="loginModal" class="material-icons">thumb_up</i>
               </div>
@@ -249,6 +292,8 @@
 </template>
 
 <script>
+import { get, put, post, postFiles, del } from "./../Ajax/Http";
+
 export default {
   data() {
     return {
@@ -264,7 +309,9 @@ export default {
       portfolioId: 0,
       checkPortfolio: false,
       checkRedact: true,
-      posts: []
+      posts: [],
+      reviews: [],
+      showReview: false
     };
   },
   created() {
@@ -278,16 +325,13 @@ export default {
   },
   methods: {
     loadPosts() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/intrestingPosts/" +
-          this.user.user.id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.posts = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/intrestingPosts/" +
+        this.user.user.id +
+        "/";
+      get(url, response => {
+        this.posts = response;
       });
     },
     editPortfolioWork(id) {
@@ -306,114 +350,90 @@ export default {
       this.$router.push({ name: item });
     },
     loadProf() {
-      $.ajax({
-        async: false,
-        url: this.$store.getters.get_url_server + "api/v2/",
-        type: "GET",
-        success: response => {
-          this.user = response;
-          this.email = this.user.user.email;
-          this.username = this.user.user.username;
-          this.rating = response.rating;
-          this.loadPortfolio();
-          this.loadPosts();
-        },
-        error: response => {
-          if (response.status === 400) {
-            console.log("Данные пользователя не загружены");
-          }
-        }
+      const url = this.$store.getters.get_url_server + "api/v2/";
+      get(url, response => {
+        this.user = response;
+        this.email = this.user.user.email;
+        this.username = this.user.user.username;
+        this.rating = response.rating;
+        this.loadPortfolio();
+        this.loadReview();
+        this.loadPosts();
       });
     },
-
     loadPortfolio() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/portfolio/" +
-          this.user.user.id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.portfolioWorks = response;
-          console.log("Все работы успешно загружены!");
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/portfolio/" +
+        this.user.user.id +
+        "/";
+      get(url, response => {
+        this.portfolioWorks = response;
+        console.log("Все работы успешно загружены!");
       });
     },
-
+    loadReview() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/my/reviews/" +
+        this.user.user.id +
+        "/";
+      get(url, response => {
+        this.reviews = response;
+      });
+    },
     DeleteProfile() {
-      $.ajax({
-        async: false,
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/portfolioDetail/" +
-          this.portfolioId,
-        type: "DELETE",
-        success: response => {
-          this.showModal = false;
-          this.flashMessage.warning({
-            title: "Информация",
-            message: "Работа удалена из профиля!"
-          });
-          this.loadPortfolio();
-        },
-        error: response => {
-          if (response.status === 400) {
-            console.log("Данные пользователя не загружены");
-          }
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/portfolioDetail/" +
+        this.portfolioId;
+      del(url, response => {
+        this.showModal = false;
+        this.flashMessage.warning({
+          title: "Информация",
+          message: "Работа удалена из профиля!"
+        });
+        this.loadPortfolio();
       });
     },
     updateIMG(id) {
       const file = $("#file");
-      // элемент, в который выведем ответ сервера
       const result = $("#result");
-      // если файл выбран, то
       if (file.prop("files").length) {
-        // создаём объект FormData
-
         const formData = new FormData();
-        // добавляем в объект FormData файл
         formData.append("img", file.prop("files")[0]);
         formData.append("pk", id);
-        $.ajax({
-          url:
-            this.$store.getters.get_url_server +
-            "api/v2/update-ava/" +
-            this.user.id +
-            "/",
-          data: formData,
-          processData: false,
-          contentType: false,
-          type: "PUT",
-          success: response => {
+        const url =
+          this.$store.getters.get_url_server +
+          "api/v2/update-ava/" +
+          this.user.id +
+          "/";
+        postFiles(
+          url,
+          response => {
             window.location.reload();
           },
-          error: response => {
+          formData,
+          response => {
             console.log("Аватар не загружен");
             this.flashMessage.error({
               title: "Ошибка",
               message: "Пожалуйста, выберите другую фотографию!"
             });
           }
-        });
+        );
       }
     },
     updateProfile(id) {
       this.updateIMG(this.$store.getters.get_user_info.id);
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v2/red/" +
-          this.user.user.id +
-          "/",
-        type: "PUT",
-        data: {
-          pk: id,
-          username: this.username,
-          email: this.email
-        },
-        success: response => {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v2/red/" +
+        this.user.user.id +
+        "/";
+      put(
+        url,
+        response => {
           this.mess = "";
           this.mess1 = "";
           this.flashMessage.warning({
@@ -422,7 +442,12 @@ export default {
           });
           this.loadProf();
         },
-        error: response => {
+        {
+          pk: id,
+          username: this.username,
+          email: this.email
+        },
+        response => {
           console.log("Профиль не обновлен");
           this.flashMessage.error({
             title: "Ошибка",
@@ -433,7 +458,7 @@ export default {
             this.mess1 = response.responseJSON.email[0];
           }
         }
-      });
+      );
     },
     onFileChange(e) {
       var files = e.target.files || e.dataTransfer.files;
@@ -451,6 +476,14 @@ export default {
       };
       reader.readAsDataURL(file);
     }
+  },
+  filters: {
+    // Фильтр полной даты числами
+    filterDateTime(item) {
+      let old_date = new Date(item);
+      return `${old_date.getDate()}.${old_date.getMonth() +
+        1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
+    }
   }
 };
 </script>
@@ -466,7 +499,7 @@ export default {
   width: 450px;
   height: 205px;
   margin: 0px auto;
-  padding:5px 20px;
+  padding: 5px 20px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);

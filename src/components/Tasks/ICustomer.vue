@@ -169,23 +169,20 @@ export default {
         this.$router.push({ name: "publicProfile", params: { Id: id } });
       }
     },
-    clearTasks(){
-      this.tasks=[];
+    clearTasks() {
+      this.tasks = [];
     },
     loadTasksByCategory(category) {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/myTasksByCategory/" +
-          category.id +
-          "/",
-        type: "GET",
-        success: response => {
-          if (response) {
-            this.tasks = response;
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/myTasksByCategory/" +
+        category.id +
+        "/";
+      get(url, response => {
+        if (response) {
+          this.tasks = response;
 
-            this.checkedCategory = category;
-          }
+          this.checkedCategory = category;
         }
       });
     },

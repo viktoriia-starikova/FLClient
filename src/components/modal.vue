@@ -1,18 +1,19 @@
 <script>
 import Datepicker from "vuejs-datetimepicker";
+import { put } from "./../Ajax/Http";
 
 export default {
   name: "modal",
   props: {
-      price: 0,
-      deadline: "",
-      id: "",
+    price: 0,
+    deadline: "",
+    id: ""
   },
-  data:{
-      maxPrice: ''
+  data: {
+    maxPrice: ""
   },
   created() {
-      this.maxPrice = this.price;
+    this.maxPrice = this.price;
   },
   components: {
     Datepicker
@@ -21,27 +22,21 @@ export default {
     close() {
       this.$emit("close");
     },
-    changedTask(){
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/task/" +
-          this.id +
-          "/",
-        type: "PUT",
-        data: {
-            price: this.price,
-            deadline: this.deadline,
+    changedTask() {
+      const url =
+        this.$store.getters.get_url_server + "api/v1/task/" + this.id + "/";
+      put(
+        url,
+        response => {
+          this.$emit("approved");
+          this.$emit("reload");
+          this.close();
         },
-        success: response => {
-            this.$emit("approved");
-            this.$emit("reload");
-            this.close();
-        },
-        error: response => {
-          console.log("False");
+        {
+          price: this.price,
+          deadline: this.deadline
         }
-      });
+      );
     }
   }
 };
@@ -52,28 +47,38 @@ export default {
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-body">
-              <slot name="header">
-                 <button type="button" class="btn-close" style="right:0px; top: 0px;position:absolute;" @click="close" aria-label="Close modal">
-                &times;
-                </button>
-                <h3><b>Увеличить сумму и сроки</b></h3>
-              </slot>
-              <hr />
+            <slot name="header">
+              <button
+                type="button"
+                class="btn-close"
+                style="right:0px; top: 0px;position:absolute;"
+                @click="close"
+                aria-label="Close modal"
+              >&times;</button>
+              <h3>
+                <b>Увеличить сумму и сроки</b>
+              </h3>
+            </slot>
+            <hr />
             <slot name="body">
-                <div class="border-bottom pb-4">
-                    <p>
-                        <b>Бюджет</b>
-                        <b style="color: red;">*</b>
-                        <b>, $</b>
-                    </p>
-                    <number-input size="small" v-model="price" :min="maxPrice" inline center controls></number-input>
-                    <p>
-                        <b>Дата сдачи</b>
-                        <b style="color: red;">*</b>
-                    </p>
-                    <Datepicker style="text-align: center;" v-model="deadline" format="YYYY-MM-DD H:i" width="130px" />
-                
-                </div>
+              <div class="border-bottom pb-4">
+                <p>
+                  <b>Бюджет</b>
+                  <b style="color: red;">*</b>
+                  <b>, $</b>
+                </p>
+                <number-input size="small" v-model="price" :min="maxPrice" inline center controls></number-input>
+                <p>
+                  <b>Дата сдачи</b>
+                  <b style="color: red;">*</b>
+                </p>
+                <Datepicker
+                  style="text-align: center;"
+                  v-model="deadline"
+                  format="YYYY-MM-DD H:i"
+                  width="130px"
+                />
+              </div>
             </slot>
           </div>
           <slot name="footer">
@@ -115,7 +120,7 @@ export default {
   width: 500px;
   height: 350px;
   margin: 0px auto;
-  padding:5px 20px;
+  padding: 5px 20px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);

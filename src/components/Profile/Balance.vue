@@ -1,5 +1,6 @@
 <template>
   <main class="container">
+    <FlashMessage></FlashMessage>
     <div class="shadow rounded alert alert-light">
       <div class="row">
         <div class="col-md-8">
@@ -92,6 +93,9 @@
             <b @click="loadTasks()">Баланс - ${{user.balance}}</b>
           </h3>
           <p>
+            <a class="a" href="#" @click="goPage('withdrawal')">Вывести средства</a>
+          </p>
+          <p>
             <a class="a" href="#" @click="goPage('myActiveTasks')">Я фрилансер</a>
           </p>
           <p>
@@ -135,7 +139,7 @@ export default {
       this.$router.push({ name: item });
     },
     loadPaymentHistory() {
-      const url = this.$store.getters.get_url_server + "api/v1/paymentHistory/";
+      const url = this.$store.getters.get_url_server + "api/v1/payment-history/";
       get(url, response => {
         this.paymentHistory = response;
       });

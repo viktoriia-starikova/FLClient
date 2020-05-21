@@ -98,6 +98,8 @@
 </template>
 
 <script>
+import { post } from "./../../Ajax/Http";
+
 export default {
   name: "Login",
   data() {
@@ -114,17 +116,12 @@ export default {
       this.$router.push({ name: item });
     },
     setLogin() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "auth/token/login/",
-        type: "POST",
-        data: {
-          username: this.user.username,
-          password: this.user.password
-        },
-        success: response => {
+      const url = this.$store.getters.get_url_server + "auth/token/login/";
+      post(
+        url,
+        response => {
           sessionStorage.setItem("token", response.auth_token);
           this.$store.commit("set_auth", true);
-
           $.ajaxSetup({
             headers: {
               Authorization: "Token " + sessionStorage.getItem("token")
@@ -132,12 +129,16 @@ export default {
           });
           window.location = "/";
         },
-        error: response => {
+        {
+          username: this.user.username,
+          password: this.user.password
+        },
+        response => {
           if (response.status === 400) {
             this.mess = response.responseJSON.non_field_errors[0];
           }
         }
-      });
+      );
     }
   }
 };

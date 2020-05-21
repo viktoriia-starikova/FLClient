@@ -74,16 +74,15 @@
                 v-bind:increment="0.1"
               ></star-rating>
             </div>
-            <div class="mt-4 ml-3">
+            <div class="media text-muted pt-3">
               <button
                 @click="loadChat()"
                 style="width: 164px; font-size: 9pt"
                 class="btn btn-warning"
               >Отправить сообщение</button>
             </div>
-            
-            <p v-if="portfolioWorks.length>0">
-              <hr />
+            <hr v-if="portfolioWorks.length>0" />
+            <div v-if="portfolioWorks.length>0">
               <div @click="checkPortfolio=!checkPortfolio" class="row portfolio">
                 <div class="col-11">
                   <h2>Портфолио</h2>
@@ -93,8 +92,8 @@
                   <i v-if="checkPortfolio" class="fa fa-chevron-down"></i>
                 </div>
               </div>
-              <hr />
-            </p>
+            </div>
+            <hr v-if="portfolioWorks.length>0" />
             <div v-if="checkPortfolio" class="row">
               <div v-for="work in portfolioWorks" class="col-md-5 alert alert-light m-4">
                 <h5>{{work.title | truncate(30, '...')}}</h5>
@@ -102,6 +101,7 @@
                 <div class="p-3 mb-3">
                   <p style="text-align: center;">
                     <img
+                      class="img-thumbnail"
                       v-if="work.img"
                       style="width: 210px; height: 170px; "
                       :src="$store.getters.get_url_media + work.img"
@@ -115,6 +115,36 @@
                 >Посмотреть</button>
               </div>
             </div>
+            <hr v-if="reviews.length > 0" />
+            <div v-if="reviews.length > 0" @click="showReview=!showReview" class="row portfolio">
+              <div class="col-md-11">
+                <h2>Отзывы</h2>
+              </div>
+              <div class="col-md-1 icon-center">
+                <i v-if="!showReview" class="fa fa-chevron-right"></i>
+                <i v-if="showReview" class="fa fa-chevron-down"></i>
+              </div>
+            </div>
+            <hr v-if="reviews.length > 0" />
+            <div v-if="showReview" class="scroller50">
+              <div v-for="review in reviews" class="row">
+                <div class="col-1"></div>
+                <div class="col-10 alert alert-light">
+                  <div class="row">
+                    <div class="col-12">
+                      <h5>{{review.message}}</h5>
+                    </div>
+                    <div class="col-12">
+                      <b>@{{review.addresser.username}}</b>
+                      <br />
+                      <b>Дата:</b>
+                      {{review.createdDate | filterDateTime}}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-1"></div>
+              </div>
+            </div>
           </div>
         </div>
         <aside v-if="posts.length" class="col-md-4">
@@ -124,10 +154,8 @@
               <h3>
                 <b>{{post.title}}</b>
               </h3>
-              <p>
-                {{post.text| truncate(300, '...')}}
-              </p>
-              <div class="col-12 mb-3">
+              <p>{{post.text| truncate(300, '...')}}</p>
+              <div class="col-12 mb-3" style="padding-left: 0px;">
                 <b>{{ post.like }}</b>
                 <i id="loginModal" class="material-icons">thumb_up</i>
               </div>
@@ -143,6 +171,8 @@
 
 
 <script>
+import { get, post, put } from "./../../Ajax/Http";
+
 export default {
   data() {
     return {
@@ -154,8 +184,10 @@ export default {
       user: "",
       portfolioWorks: [],
       posts: [],
-      checkPortfolio:false,
-      post:""
+      checkPortfolio: false,
+      post: "",
+      reviews: [],
+      showReview: false
     };
   },
   created() {
@@ -177,74 +209,82 @@ export default {
     loadPost(id) {
       this.$router.push({ name: "post_detail", params: { postId: id } });
     },
+    loadReview() {
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/my/reviews/" +
+        this.user.user.id +
+        "/";
+      get(url, response => {
+        this.reviews = response;
+      });
+    },
     loadChat() {
       this.$router.push({ name: "dialog", params: { id: this.user.user.id } });
     },
     loadPosts() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/intrestingPosts/" +
-          this.$route.params.Id+
-          "/",
-        type: "GET",
-        success: response => {
-          this.posts = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/intrestingPosts/" +
+        this.$route.params.Id +
+        "/";
+      get(url, response => {
+        this.posts = response;
       });
     },
     loadProf(context) {
-      $.ajax({
-        async: false,
-        url:
-          this.$store.getters.get_url_server +
-          "api/v2/prof/" +
-          this.$route.params.Id +
-          "/",
-        type: "GET",
-        success: response => {
-          this.user = response;
-          this.email = this.user.user.email;
-          this.username = this.user.user.username;
-          this.loadPortfolio();
-          this.loadPosts();
-        },
-        error: response => {
-          if (response.status === 400) {
-            console.log("Данные пользователя не загружены");
-          }
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v2/prof/" +
+        this.$route.params.Id +
+        "/";
+      get(url, response => {
+        this.user = response;
+        this.email = this.user.user.email;
+        this.username = this.user.user.username;
+        this.loadPortfolio();
+        this.loadPosts();
+        this.loadReview();
       });
     },
     loadPortfolio() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/portfolio/" + this.user.user.id + "/",
-        type: "GET",
-        success: response => {
-          this.portfolioWorks = response;
-          console.log("Все работы успешно загружены!");
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/portfolio/" +
+        this.user.user.id +
+        "/";
+      get(url, response => {
+        this.portfolioWorks = response;
+        console.log("Все работы успешно загружены!");
       });
-    },
+    }
+  },
+  filters: {
+    // Фильтр полной даты числами
+    filterDateTime(item) {
+      let old_date = new Date(item);
+      return `${old_date.getDate()}.${old_date.getMonth() +
+        1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
+    }
   }
 };
 </script>
 <style>
-.portfolio{
+.portfolio {
   cursor: pointer;
-  display: flex; 
-  color: #b38a22
+  display: flex;
+  color: #b38a22;
 }
 .rating {
   font-size: 14px;
 }
 .icon-center {
-   margin: auto;
+  margin: auto;
 }
-.icon-settings{
+.icon-settings {
   cursor: pointer;
-  position: absolute; 
-  right:10px;
+  position: absolute;
+  right: 10px;
   color: black;
 }
 </style>

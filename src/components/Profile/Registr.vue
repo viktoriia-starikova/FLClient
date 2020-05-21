@@ -5,7 +5,7 @@
         <div class="col-md-8">
           <div class="form-section">
             <h2>Регистрация на сайте</h2>
-            <form method="post">
+            <form>
               <div class="form-group">
                 <label class="col-form-label requiredField">
                   Имя пользователя
@@ -30,7 +30,7 @@
                   <span class="asteriskField">*</span>
                 </label>
                 <div class>
-                  <input v-model="password1" class="textinput textInput form-control" />
+                  <input v-model="password1"  type="password" class="textinput textInput form-control" />
                   <p id="p">{{mess2}}</p>
                   <small class="form-text text-muted">
                     <ul>
@@ -50,13 +50,15 @@
                     type="email"
                     maxlength="254"
                     class="emailinput form-control"
+                    placeholder="Введите email"
                   />
                 </div>
+                <small class="form-text text-muted">Мы никогда не будем делиться вашей электронной почтой ни с кем другим.</small>
               </div>
 
               <button
                 @click="createProfile"
-                type="button"
+                type="submit"
                 class="btn btn-outline-warning btn-block btn-dark"
               >Зарегистрироваться</button>
             </form>
@@ -123,6 +125,8 @@
 
 
 <script>
+import { post } from "./../../Ajax/Http";
+
 export default {
   data() {
     return {
@@ -138,22 +142,22 @@ export default {
       this.$router.push({ name: item });
     },
     createProfile() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v2/reg2/",
-        type: "POST",
-        data: {
-          username: this.username,
-          email: this.email,
-          password: this.password1
-        },
-        success: response => {
+      const url = this.$store.getters.get_url_server + "api/v2/reg2/";
+      post(
+        url,
+        response => {
           this.flashMessage.warning({
             title: "Информация",
             message: "Вы создали свой профиль!"
           });
           this.$router.push({ name: "login" });
         },
-        error: response => {
+        {
+          username: this.username,
+          email: this.email,
+          password: this.password1
+        },
+        response => {
           if (response.status === 400) {
             this.mess1 = response.responseJSON.username[0];
             this.mess2 = response.responseJSON.password[0];
@@ -163,7 +167,7 @@ export default {
             });
           }
         }
-      });
+      );
     }
   }
 };

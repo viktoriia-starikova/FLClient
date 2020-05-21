@@ -123,7 +123,7 @@ export default {
     },
     sendMessage() {
       const url = this.$store.getters.get_url_server + "api/v1/messages/";
-      pos(url, response => {
+      post(url, response => {
         this.text = "";
         console.log("Sended message");
       }, {room: this.roomId, text: this.text});
@@ -205,7 +205,8 @@ export default {
 
 <style>
 .scroller50 {
-  overflow: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
   height: 50vh !important;
 }
 .user {

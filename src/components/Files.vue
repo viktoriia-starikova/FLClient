@@ -4,6 +4,7 @@
       <img v-if="docFile(file.file)" class="file" :src="$store.getters.get_url_media + '/Media/txt.png'"/>
       <img
         v-if="getExtencion(file.file) == 'png' || 
+        getExtencion(file.file) == 'PNG' || 
         getExtencion(file.file) == 'jpg' || 
         getExtencion(file.file) == 'svg' || 
         getExtencion(file.file) == 'gif'"
@@ -42,7 +43,9 @@ export default {
       return (
         extencion != "rar" &&
         extencion != "7zip" &&
+        extencion != "zip" &&
         extencion != "png" &&
+        extencion != "PNG" &&
         extencion != "jpg" &&
         extencion != "svg" &&
         extencion != "gif" &&
@@ -53,7 +56,7 @@ export default {
     },
     rarFile(filename) {
       const extencion = this.getExtencion(filename);
-      return extencion == "rar" || extencion == "7zip";
+      return extencion == "rar" || extencion == "7zip" || extencion == "zip";
     },
     docFile(filename) {
       const extencion = this.getExtencion(filename);

@@ -80,6 +80,8 @@
 </template>
 
 <script>
+import { get, post } from "./../../Ajax/Http";
+
 export default {
        name:"Tasks",
        props: {
@@ -114,53 +116,34 @@ export default {
              this.$router.push({name: item})
          },
          loadTasks() {
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/tasks/',
-             type:"GET",
-             success: (response) => {
-               this.tasks=response.filter(r=>!r.approved)
-                
-               this.checkedCategory = ""
-             }
-           })
+           const url = this.$store.getters.get_url_server + 'api/v1/tasks/';
+           get(url, response => {
+               this.tasks=response.filter(r=>!r.approved);
+               this.checkedCategory = "";
+           });
          },
          loadCategoryChilds(id) {
-             
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/categoryChilds/' + id +'/',
-             type:"GET",
-             success: (response) => {
+           const url = this.$store.getters.get_url_server + 'api/v1/categoryChilds/' + id +'/';
+           get(url, response => {
                if(response){
-                 this.categoryChilds.set(id, response)
-                  
+                 this.categoryChilds.set(id, response);
                }
-             }
-           })
+             });
          },
          loadTasksByCategory(category) {
-             
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/allTasksByCategory/' + category.id +'/',
-             type:"GET",
-             success: (response) => {
+           const url = this.$store.getters.get_url_server + 'api/v1/allTasksByCategory/' + category.id +'/';
+           get(url, response => {
                if(response){
-                  this.tasks=response
-                   
-                  this.checkedCategory = category
-               }
-             }
-           })
+                  this.tasks=response;
+                  this.checkedCategory = category;
+               };
+             });
          },
          loadCategories() {
-             
-           $.ajax({
-             url: this.$store.getters.get_url_server + 'api/v1/categories/',
-             type:"GET",
-             success: (response) => {
-                
-               this.categories=response
-             }
-           })
+           const url = this.$store.getters.get_url_server + 'api/v1/categories/';
+           get(url, response => {
+               this.categories=response;
+             });
          },
          loadTask(id) {
            this.$router.push({ name: 'task_detail', params: { taskId: id }})

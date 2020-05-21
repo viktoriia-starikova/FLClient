@@ -22,20 +22,20 @@
                 </span>
                 <p>
                   <b class="user_image">Автор:</b>
-                  <a @click="loadProf(postid.avtor.id)" href>{{postid.avtor.username}}</a>
+                  <a @click="loadProf(postid.author.id)" href>{{postid.author.username}}</a>
                 </p>
               </div>
             </div>
             <hr />
             <a
               href="#"
-              v-if="avtoriz"
+              v-if="authoriz"
               @click="updatePost(postid.id)"
               class="btn btn-info btn-block"
             >Редактировать</a>
             <a
               href="#"
-              v-if="avtoriz"
+              v-if="authoriz"
               @click="DeletePost(postid.id)"
               class="btn btn-danger btn-block"
             >Удалить</a>
@@ -47,7 +47,7 @@
               <li class="media">
                 <div class="media-body">
                   <div class="media-heading">
-                    <a @click="loadProf(sub.avtor.id)" href>{{sub.avtor.username}}</a>
+                    <a @click="loadProf(sub.author.id)" href>{{sub.author.username}}</a>
                     <div class="metadata">
                       <span class="date">{{sub.date| filterDateTime}}</span>
                     </div>
@@ -122,6 +122,8 @@
 </template>
 
 <script>
+import { get, post } from "./../../Ajax/Http";
+
 export default {
   name: "PostDetail",
 
@@ -130,7 +132,7 @@ export default {
       postid: "",
       comment: "",
       comments: "",
-      show: false
+      show: true
     };
   },
   created() {
@@ -142,11 +144,11 @@ export default {
       if (this.$store.getters.get_auth) return true;
       else return false;
     },
-    avtoriz() {
+    authoriz() {
       if (
         this.$store.getters.get_auth &&
         (this.$store.getters.get_user_info.user.username ==
-          this.postid.avtor.username ||
+          this.postid.author.username ||
           this.$store.getters.get_user_info.user.username == "Administrator")
       )
         return true;
@@ -162,73 +164,56 @@ export default {
       else this.show = true;
     },
     loadProf(id) {
-      if(this.$store.getters.get_user_info.user.id == id){
+      if (this.$store.getters.get_user_info.user.id == id) {
         this.$router.push({ name: "profile", params: { Id: id } });
-      }
-      else{
+      } else {
         this.$router.push({ name: "publicProfile", params: { Id: id } });
       }
     },
     loadComment() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/comment/" +
-          this.$route.params.postId +
-          "/",
-        type: "GET",
-        success: response => {
-          this.comments = response;
-        },
-        error: response => {
-          console.log("False");
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/comment/" +
+        this.$route.params.postId +
+        "/";
+      get(url, response => {
+        this.comments = response;
       });
     },
     sendComment() {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/comment/",
-        type: "POST",
-
-        data: {
-          text: this.comment,
-          post: this.$route.params.postId
-        },
-        success: response => {
+      const url = this.$store.getters.get_url_server + "api/v1/comment/";
+      post(
+        url,
+        response => {
           this.comment = "";
           this.loadComment();
         },
-        error: response => {
-          console.log("False");
+        {
+          text: this.comment,
+          post: this.$route.params.postId
         }
-      });
+      );
     },
     like(id) {
-      $.ajax({
-        url: this.$store.getters.get_url_server + "api/v1/like/",
-        type: "POST",
-        data: {
-          pk: id
-        },
-        success: response => {
+      const url = this.$store.getters.get_url_server + "api/v1/like/";
+      post(
+        url,
+        response => {
           this.loadPost();
         },
-        error: response => {
-          console.log("False");
+        {
+          pk: id
         }
-      });
+      );
     },
     loadPost() {
-      $.ajax({
-        url:
-          this.$store.getters.get_url_server +
-          "api/v1/posts/" +
-          this.$route.params.postId +
-          "/",
-        type: "GET",
-        success: response => {
-          this.postid = response;
-        }
+      const url =
+        this.$store.getters.get_url_server +
+        "api/v1/posts/" +
+        this.$route.params.postId +
+        "/";
+      get(url, response => {
+        this.postid = response;
       });
     },
     DeletePost(id) {
@@ -243,7 +228,8 @@ export default {
     filterDateTime(item) {
       let old_date = new Date(item);
       return `
-                 ${old_date.getDate()}.${old_date.getMonth()+1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
+                 ${old_date.getDate()}.${old_date.getMonth() +
+        1}.${old_date.getFullYear()} в ${old_date.getHours()}:${old_date.getMinutes()}`;
     }
   }
 };
