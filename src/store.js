@@ -5,8 +5,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    url_server: "http://127.0.0.1:8000/",
-    url_media: "http://127.0.0.1:8000",
+    url_server: "https://flheroku.herokuapp.com/",
+    url_media: "https://flheroku.herokuapp.com",
     auth_user: false,
     user: '',
 
